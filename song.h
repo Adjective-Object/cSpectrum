@@ -2,25 +2,7 @@
 #define SPECTRUM_SONG_INCLUDED
 
 #define SPECTRUM_FRAME_SIZE 4096
-
-class Player{
-
-    //contents of the current frame (on the heap)
-    int *framedata;
-
-    int _currentframe;
-    int _totalframes;
-
-    FILE *stream;
-
-public:
-    void next_frame(); //steps to the next frame
-
-    int *get_data()     {return framedata;}
-
-    int currentframe()  {return _currentframe;}
-    int totalframes()   {return _totalframes;}
-};
+#include <iostream>
 
 
 // Handles all class metadata. Just a bunch of fancy getters and setters
@@ -41,6 +23,10 @@ class MetaDater{
     char *_originalartist;
 
 public:
+
+    MetaDater(char *filename);
+    ~MetaDater();
+
     //song metadata
     char *title()           {return _title;}
     char *artist()          {return _artist;}
@@ -54,6 +40,29 @@ public:
 
     char *genre()           {return _genre;}
     char *originalartist()  {return _originalartist;}
+};
+
+class Player{
+
+    //contents of the current frame (on the heap)
+    int *framedata;
+
+    int _currentframe;
+    int _totalframes;
+
+    FILE *stream;
+
+public:
+
+    Player(char *songstring);
+    ~Player();
+
+    void next_frame(); //steps to the next frame
+
+    int *get_data()     {return framedata;}
+
+    int currentframe()  {return _currentframe;}
+    int totalframes()   {return _totalframes;}
 };
 
 typedef struct Song{

@@ -1,13 +1,14 @@
 #include <cstdio>
 #include "song.h"
-using namespace std; 
+#include <stdlib.h>
+using namespace std;
 
 #define SPECTRUM_PLAYERBUFFCOMMAND 100
 
 // Date constructor
 Player::Player(char *filename) {
 	//will fail on non-null terminated strings
-	char *command = malloc(sizeof(char) * SPECTRUM_PLAYERBUFFCOMMAND) 
+	char *command = (char *)malloc(sizeof(char) * SPECTRUM_PLAYERBUFFCOMMAND);
 	snprintf(
 		command, 
 		SPECTRUM_PLAYERBUFFCOMMAND, 
@@ -15,18 +16,14 @@ Player::Player(char *filename) {
 	//where does stderr even go?
 	stream = popen(command, "r");
 
-	framedata = malloc(sizeof(int) * SPECTRUM_FRAME_SIZE);
+	framedata = (int *)malloc(sizeof(int) * SPECTRUM_FRAME_SIZE);
 	_currentframe = 0;
 
 	_totalframes = 0; //TODO calculate song size
 }
 
-Player::GetMetadater(){
-	
-}
-
 //opens the ffmpeg subprocess
-Player::next_frame() {
+void Player::next_frame() {
 
 }
 
@@ -34,35 +31,17 @@ Player::next_frame() {
 
 
 MetaDater::MetaDater(char *filename) {
-	char *command = malloc(sizeof(char) * SPECTRUM_PLAYERBUFFCOMMAND) 
+	char *command = (char *)malloc(sizeof(char) * SPECTRUM_PLAYERBUFFCOMMAND);
 	snprintf(
 		command, 
 		SPECTRUM_PLAYERBUFFCOMMAND, 
 		"ffprobe %s");
 	//where does stderr go?
-	stream = popen(command, "r");
+	FILE *stream = popen(command, "r");
 
 	char s[100];
-	char *ref = "Input #0, ";
-	found = 0;
-	while (!found && fgetss, 100, (stream) != NULL){
-		for(int i=0; i<10; i++){
-			if(ref[i] != s[is]){
-				break;
-			}
-			if (i==9){{
-				found = 1;
-			}}
-		}
-	}
-	
-	if (!found){
-		exit(1);
-	}
-
-	while (!found && fgetss, 100, (stream) != NULL){
-	
-
+	string ref = "Input #0, ";
+	int found = 0;
 
 }
 
