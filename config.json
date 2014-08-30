@@ -1,0 +1,36 @@
+{
+	"version" : "0a", // version of the config file's format
+	
+	"resolution" : [800, 600],
+	"components" : [
+		{
+			"type" : "bareq",
+			"worldanchor" : "bottom left",
+			"localanchor" : "bottom right",
+			"offset" : [0,0],
+			"color" : "ff0000ff", //needs to be rgba
+			"barcount" : 12
+		},
+
+		{
+			"type" : "text",
+			"worldanchor" : "middle middle",
+			"localanchor" : "middle left",
+			"offset": [1,10],
+			"font" : "Lato-Regular",
+			"fontsize": 24,
+			"text" : "TEST TEXT"
+		},
+
+
+		{
+			"type" : "text",
+			"worldanchor" : "1/12 middle",
+			"localanchor" : "middle middle",
+			"offset": [-1,-100],
+			"font" : "Airbag-Regular",
+			"fontsize": 24,
+			"text" : "TEST TEXT 2"
+		}
+	]
+}

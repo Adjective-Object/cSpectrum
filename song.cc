@@ -3,7 +3,7 @@
 #include <stdlib.h>
 using namespace std;
 
-#define SPECTRUM_PLAYERBUFFCOMMAND 100
+static int const SPECTRUM_PLAYERBUFFCOMMAND = 100;
 
 // Date constructor
 Player::Player(char *filename) {

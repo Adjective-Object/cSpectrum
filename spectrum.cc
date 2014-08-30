@@ -1,6 +1,7 @@
 #include <iostream>
 #include "json/json.h"
 #include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
 #include "vcomponents.h"
 #include "song.h"
 using namespace std;
@@ -72,13 +73,25 @@ int main (int argc, char *argv []) {
 		return 1;
 	}
 
-	vector<VComponent> contents = getComponentVector(root["components"]);
 
 	//Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );
+	TTF_Init();
+
+	//decode components from the string
+	vector<EQComponent *> contents = getComponentVectors(root["components"]);
+
+	if(verbose){
+		for (int i=0; i<contents.size(); i++){
+			cout << endl << contents[i]->repr() <<endl;
+		}
+		cout << endl;
+	}
+
 
 	//Quit SDL
 	SDL_Quit();
+	TTF_Quit();
 
 	return 0;
 }

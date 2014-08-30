@@ -1,7 +1,7 @@
 #ifndef SPECTRUM_SONG_INCLUDED
 #define SPECTRUM_SONG_INCLUDED
 
-#define SPECTRUM_FRAME_SIZE 4096
+static int const SPECTRUM_FRAME_SIZE = 4096;
 #include <iostream>
 
 
