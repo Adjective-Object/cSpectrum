@@ -1,7 +1,7 @@
 #include <iostream>
 #include "json/json.h"
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_ttf.h"
 #include "vcomponents.h"
 #include "song.h"
 using namespace std;
@@ -15,14 +15,15 @@ void youDidItWrong(){
 	 exit(1);
 }
 
-int main (int argc, char *argv []) {
+
+bool preview = 0;
+bool verbose = 0;
+
+pair<char *, char *> parseArgs(int argc, char *argv[]){
 	//usage is "spectrum soundfile cfgfile"q
 	if (argc < 2) {
 		 youDidItWrong();
 	}
-
-	int preview = 0;
-	int verbose = 0;
 
 	int ccount = 0;
 	do{
@@ -50,8 +51,14 @@ int main (int argc, char *argv []) {
 		cout << "config: " << (cfgfilename) << endl;
 	}
 
+	return make_pair(soundfilename, cfgfilename);
+}
+
+// this should probably put the tree on the heap so it doesn't need
+// to be passed down, buttfuckit.
+Json::Value loadJsonCfg(char *cfgfilename){
 	//load the config string
- 	
+	
 	char cfgstring[8192];
 	FILE *fp = fopen(cfgfilename, "r");
 	int tcount = 0;
@@ -70,17 +77,65 @@ int main (int argc, char *argv []) {
 		// report to the user the failure and their locations in the document.
 		cout  << "Failed to parse configuration\n"
 				   << reader.getFormattedErrorMessages();
-		return 1;
+		exit(1);
 	}
 
+	return root;
+}
+
+void windodwed_mainloop(
+		Json::Value config, 
+		vector<EQComponent *> components){
+
+	int xresolution = config["resolution"][0].asInt();
+	int yresolution = config["resolution"][1].asInt();
+
+	int bkgfill = stoi(config["bkgfill"].asString(), NULL, 16);
+
+	printf("entering windowed mainloop (%d, %d)\n",
+			xresolution, yresolution);
+
+	SDL_Window *gWindow = SDL_CreateWindow(
+		"cSpectrum", 
+		SDL_WINDOWPOS_UNDEFINED, 
+		SDL_WINDOWPOS_UNDEFINED, 
+		xresolution, 
+		yresolution, 
+		SDL_WINDOW_SHOWN );
+    SDL_Surface *gScreenSurface = SDL_GetWindowSurface( gWindow );
+    
+
+	SDL_Event e;
+	bool quit = false;
+	while(!quit){
+		while( SDL_PollEvent( &e ) != 0 ) {
+			//User requests quit
+			if( e.type == SDL_QUIT ) {
+				quit = true;
+			}
+		}
+
+
+
+	}
+}
+
+int main (int argc, char *argv []) {
+
+	cout << "initial" << endl;
+	
+	//soundfile, cfgfile
+	pair<char *, char *> parsed = parseArgs(argc, argv);
+	Json::Value root = loadJsonCfg(parsed.second);
 
 	//Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );
 	TTF_Init();
 
-	//decode components from the string
-	vector<EQComponent *> contents = getComponentVectors(root["components"]);
-
+	//decode components from the JSON
+	vector<EQComponent *> contents = getComponentVectors(
+		root["components"]
+	);
 	if(verbose){
 		for (int i=0; i<contents.size(); i++){
 			cout << endl << contents[i]->repr() <<endl;
@@ -88,6 +143,8 @@ int main (int argc, char *argv []) {
 		cout << endl;
 	}
 
+	//enter mainloop
+	windodwed_mainloop(root["config"], contents);
 
 	//Quit SDL
 	SDL_Quit();

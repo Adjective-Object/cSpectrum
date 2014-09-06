@@ -7,7 +7,10 @@
 //perhaps bad nomenclature
 class EQComponent{
 public:
-	virtual void renderToTexture(SDL_Surface *texture) {};
+	virtual void renderToTexture(
+		SDL_Surface *texture, 
+		int timeStepMillis, 
+		std::vector<int> fftbuffer) {};
 	virtual std::string repr() {return "<EQComponent with unimplented repr>";};
 };
 
@@ -30,12 +33,16 @@ class SimpleBarEq : public EQComponent{
 	Anchor anchor;
 
 	int nBars;
-	unsigned long color;
+	long color;
 
 
 public:
 	SimpleBarEq(Anchor anchorPt, int numBars, Uint32 barColor);
-	void renderToTexture(SDL_Surface *texture);
+	void renderToTexture(
+		SDL_Surface *texture, 
+		int timeStepMillis, 
+		std::vector<int> fftbuffer);
+
 	std::string repr();
 };
 
@@ -48,7 +55,11 @@ class TextComponent : public EQComponent {
 
 public:
 	TextComponent(Anchor a, std::string txt, TTF_Font *dfont);
-	void renderToTexture(SDL_Surface *texture);
+	void renderToTexture(
+		SDL_Surface *texture, 
+		int timeStepMillis, 
+		std::vector<int> fftbuffer);
+	
 	std::string repr();
 };
 

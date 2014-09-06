@@ -203,7 +203,10 @@ string SimpleBarEq::repr() {
 	return out;
 }
 
-void SimpleBarEq::renderToTexture(SDL_Surface *texture){
+void SimpleBarEq::renderToTexture(
+		SDL_Surface *texture, 
+		int timeStepMillis, 
+		std::vector<int> fftbuffer){
 
 }
 
@@ -230,8 +233,10 @@ string TextComponent::repr() {
 	return out;
 }
 
-void TextComponent::renderToTexture(SDL_Surface *texture){
+void TextComponent::renderToTexture(
+		SDL_Surface *texture, 
+		int timeStepMillis, 
+		std::vector<int> fftbuffer){
 
 }
-
 

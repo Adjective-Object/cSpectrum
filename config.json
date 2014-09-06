@@ -1,7 +1,10 @@
 {
 	"version" : "0a", // version of the config file's format
 	
-	"resolution" : [800, 600],
+	"config" : {
+		"resolution" : [800, 600],
+		"bkgfill" : "ffffff"
+	},
 	"components" : [
 		{
 			"type" : "bareq",
