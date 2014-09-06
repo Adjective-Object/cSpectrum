@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 #include "json/json.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
@@ -113,6 +114,16 @@ void windodwed_mainloop(
 			if( e.type == SDL_QUIT ) {
 				quit = true;
 			}
+
+			for (uint i=0; i<components.size(); i++){
+				components[i]->renderToSurface(
+					gScreenSurface, 
+					100, 
+					NULL);
+			}
+
+			//TODO sleeping remainder time to framerate cap
+			SDL_UpdateWindowSurface(gWindow);
 		}
 
 
@@ -137,7 +148,7 @@ int main (int argc, char *argv []) {
 		root["components"]
 	);
 	if(verbose){
-		for (int i=0; i<contents.size(); i++){
+		for (uint i=0; i<contents.size(); i++){
 			cout << endl << contents[i]->repr() <<endl;
 		}
 		cout << endl;

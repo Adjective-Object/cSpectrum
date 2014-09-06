@@ -127,6 +127,12 @@ EQComponent *makeTextComponent(Json::Value def){
 	);
 }
 
+EQComponent *makeBackgroundImage(Json::Value def){
+	SDL_Surface *bkg = NULL;
+	bkg = SDL_LoadBMP( def["img"].asString().c_str() );
+	return new BackgroundImage(bkg);
+}
+
 //
 // Mapping of component names to the parsing functions
 //
@@ -140,6 +146,7 @@ void initializeComponentMapping(){
 
 		cMap["bareq"] = makeSimpleBarEq;
 		cMap["text"] = makeTextComponent;
+		cMap["bkgimg"] = makeBackgroundImage;
 	}
 }
 
@@ -203,10 +210,10 @@ string SimpleBarEq::repr() {
 	return out;
 }
 
-void SimpleBarEq::renderToTexture(
+void SimpleBarEq::renderToSurface(
 		SDL_Surface *texture, 
 		int timeStepMillis, 
-		std::vector<int> fftbuffer){
+		std::vector<int> *fftbuffer){
 
 }
 
@@ -233,10 +240,31 @@ string TextComponent::repr() {
 	return out;
 }
 
-void TextComponent::renderToTexture(
+void TextComponent::renderToSurface(
 		SDL_Surface *texture, 
 		int timeStepMillis, 
-		std::vector<int> fftbuffer){
+		std::vector<int> *fftbuffer){
 
 }
 
+BackgroundImage::BackgroundImage(SDL_Surface *img){
+		image = img;
+}
+
+string BackgroundImage::repr(){
+	return "<Background Image>";
+}
+
+void BackgroundImage::renderToSurface(
+	SDL_Surface *texture, 
+	int timeStepMillis, 
+	std::vector<int> *fftbuffer){
+
+	SDL_BlitSurface(
+		image, NULL,
+		texture, NULL
+		);
+
+	cout << ";";
+	cout.flush();
+}

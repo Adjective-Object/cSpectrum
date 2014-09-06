@@ -7,6 +7,10 @@
 	},
 	"components" : [
 		{
+			"type" : "bkgimg",
+			"img" : "assets/newd.jpg"
+		},
+		{
 			"type" : "bareq",
 			"worldanchor" : "bottom left",
 			"localanchor" : "bottom right",
