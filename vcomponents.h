@@ -1,14 +1,20 @@
 #ifndef SPECTRUM_EQCOMPONENTS_INCLUDED
 #define SPECTRUM_EQCOMPONENTS_INCLUDED
 #include "json/json.h"
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_ttf.h"
+
+extern SDL_Rect Spectrum_screenbounds;
+extern SDL_PixelFormat *Spectrum_screenformat;
+extern float Spectrum_screenratio;
+extern bool verbose;
+
 
 //perhaps bad nomenclature
 class EQComponent{
 public:
 	virtual void renderToSurface(
-		SDL_Surface *texture, 
+		SDL_Surface *targetSurface, 
 		int timeStepMillis, 
 		std::vector<int> *fftbuffer) {};
 	virtual std::string repr() {return "<EQComponent with unimplented repr>";};
@@ -39,7 +45,7 @@ class SimpleBarEq : public EQComponent{
 public:
 	SimpleBarEq(Anchor anchorPt, int numBars, Uint32 barColor);
 	void renderToSurface(
-		SDL_Surface *texture, 
+		SDL_Surface *targetSurface, 
 		int timeStepMillis, 
 		std::vector<int> *fftbuffer);
 
@@ -49,14 +55,13 @@ public:
 
 class TextComponent : public EQComponent {
 	Anchor anchor;
-
 	std::string text;
 	TTF_Font *font;
 
 public:
 	TextComponent(Anchor a, std::string txt, TTF_Font *dfont);
 	void renderToSurface(
-		SDL_Surface *texture, 
+		SDL_Surface *targetSurface, 
 		int timeStepMillis, 
 		std::vector<int> *fftbuffer);
 	
@@ -65,12 +70,14 @@ public:
 
 class BackgroundImage : public EQComponent{
 	SDL_Surface *image;
+	std::string path;
 
 public:
-	BackgroundImage(SDL_Surface *img);
+	BackgroundImage(std::string imgpath);
+	~BackgroundImage();
 	std::string repr();
 	void renderToSurface(
-		SDL_Surface *texture, 
+		SDL_Surface *targetSurface, 
 		int timeStepMillis, 
 		std::vector<int> *fftbuffer);
 };

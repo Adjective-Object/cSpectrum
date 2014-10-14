@@ -8,7 +8,7 @@
 	"components" : [
 		{
 			"type" : "bkgimg",
-			"img" : "assets/newd.jpg"
+			"img" : "assets/newd.bmp"
 		},
 		{
 			"type" : "bareq",
