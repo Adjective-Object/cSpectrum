@@ -1,7 +1,10 @@
 #include "SDL2/SDL.h"
 #include <iostream>
+#include <string>
+#include "spectrumutil.h"
 
 using namespace std;
+extern SDL_Rect Spectrum_screenbounds;
 
 SDL_Surface *ScaledCroppedCopy(
     SDL_Surface *source, 

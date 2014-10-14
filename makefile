@@ -1,10 +1,9 @@
 #SDL_FLAGS = -ljsoncpp -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 SDL_FLAGS = -ljsoncpp -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
-LD_LIBRARY_PATH = 
 
-spectrum: song.o vcomponents.o sdlhelper.o spectrum.cpp
+spectrum: spectrum.cpp song.o vcomponents.o spectrumutil.o anchor.o fftmanager.o
 	g++ -Wall -g -std=c++11 -m64 -o spectrum\
-		spectrum.cpp song.o vcomponents.o sdlhelper.o\
+		$^\
 		-L/usr/lib64/ $(SDL_FLAGS)
 
 %.o: %.cpp %.h

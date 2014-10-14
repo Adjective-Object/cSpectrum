@@ -3,6 +3,9 @@
 #include "json/json.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
+#include "anchor.h"
+#include "fftmanager.h"
+#include <stdlib.h>
 
 extern SDL_Rect Spectrum_screenbounds;
 extern SDL_PixelFormat *Spectrum_screenformat;
@@ -15,19 +18,10 @@ class EQComponent{
 public:
 	virtual void renderToSurface(
 		SDL_Surface *targetSurface, 
-		int timeStepMillis, 
-		std::vector<int> *fftbuffer) {};
+		int timeStepMillis) {};
 	virtual std::string repr() {return "<EQComponent with unimplented repr>";};
 };
 
-typedef struct Anchor {
-	std::pair<float, float> worldAnchor;
-	std::pair<float, float> localAnchor;
-	std::pair<int, int> offset;
-} Anchor;
-
-std::string anchorRepr(Anchor a);
-Anchor loadAnchor(Json::Value def);
 
 std::vector<EQComponent *> getComponentVectors(Json::Value components);
 
@@ -41,13 +35,18 @@ class SimpleBarEq : public EQComponent{
 	int nBars;
 	long color;
 
+	int height, barwidth, barpadding;
+
+	//cached values for optimization
+	std::pair<int, int> offset;
+	SDL_Rect drawrect;
 
 public:
-	SimpleBarEq(Anchor anchorPt, int numBars, Uint32 barColor);
+	SimpleBarEq(Anchor anchorPt, int numBars, Uint32 barColor,
+		int height, int barpadding, int barwidth);
 	void renderToSurface(
 		SDL_Surface *targetSurface, 
-		int timeStepMillis, 
-		std::vector<int> *fftbuffer);
+		int timeStepMillis);
 
 	std::string repr();
 };
@@ -62,8 +61,7 @@ public:
 	TextComponent(Anchor a, std::string txt, TTF_Font *dfont);
 	void renderToSurface(
 		SDL_Surface *targetSurface, 
-		int timeStepMillis, 
-		std::vector<int> *fftbuffer);
+		int timeStepMillis);
 	
 	std::string repr();
 };
@@ -78,8 +76,7 @@ public:
 	std::string repr();
 	void renderToSurface(
 		SDL_Surface *targetSurface, 
-		int timeStepMillis, 
-		std::vector<int> *fftbuffer);
+		int timeStepMillis);
 };
 
 

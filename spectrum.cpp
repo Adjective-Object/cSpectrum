@@ -1,11 +1,14 @@
 #include <iostream>
 #include <time.h>
+#include <stdlib.h>
 #include "json/json.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
 #include "SDL2/SDL_image.h"
-#include "vcomponents.h"
 #include "song.h"
+#include "vcomponents.h"
+#include "fftmanager.h"
+
 using namespace std;
 
 SDL_Rect Spectrum_screenbounds;
@@ -93,14 +96,21 @@ Json::Value loadJsonCfg(char *cfgfilename){
 	return root;
 }
 
+void fakeBuffer(vector<float> *fftbuffer) {
+	for(uint i=0; i<fftbuffer->size(); i++){
+		(*fftbuffer)[i] = rand()/ (float)(RAND_MAX);
+	}
+}
+
 void mainloop(Json::Value config, vector<EQComponent *> components) {
 
 	Uint32 bkgfill = stoi(config["bkgfill"].asString(), NULL, 16);
 
-	printf("entering windowed mainloop (%d, %d)\n",
+	printf("entering main loop (%d, %d)\n",
 			xresolution, yresolution);
 
-	std::vector<int> *fftbuffer
+	//fftbuffer
+	vector<float> fftbuffer(16);
 
 	SDL_Event e;
 	bool quit = false;
@@ -112,16 +122,19 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 			}
 		}
 
+		fakeBuffer(&fftbuffer);
+
 		SDL_FillRect(gScreenSurface, 
 				&Spectrum_screenbounds,
 				bkgfill
 			);
 
+		FFT_setFrameBin(fftbuffer);
+
 		for (uint i=0; i<components.size(); i++){
 			components[i]->renderToSurface(
 				gScreenSurface, 
-				100, 
-				NULL);
+				100);
 		}
 
 		//TODO sleeping remainder time to framerate cap
