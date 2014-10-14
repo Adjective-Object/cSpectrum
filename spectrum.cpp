@@ -110,7 +110,7 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 			xresolution, yresolution);
 
 	//fftbuffer
-	vector<float> fftbuffer(16);
+	vector<float> fftbuffer(100);
 
 	SDL_Event e;
 	bool quit = false;
@@ -123,6 +123,12 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 		}
 
 		fakeBuffer(&fftbuffer);
+
+		/*
+		for (auto c : fftbuffer)
+    		cout << c << ' ';
+    	cout << endl;
+		*/
 
 		SDL_FillRect(gScreenSurface, 
 				&Spectrum_screenbounds,

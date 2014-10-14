@@ -19,7 +19,7 @@ void initializeTermMapping(){
 		tMap["top"] 	= 0.0f;
 		tMap["middle"] 	= 0.5f;
 		tMap["bottom"] 	= 1.0f;
-		tMap["left"] 	= 0.5f;
+		tMap["left"] 	= 0.0f;
 		tMap["right"] 	= 1.0f;
 	}
 }
@@ -50,8 +50,8 @@ pair<float,float> parseFloatPair(Json::Value def) {
 	}
 
 	*(spaceindex) = '\0';
-	string first = string(s);
-	string second = string(spaceindex+1);
+	string second = string(s);
+	string first = string(spaceindex+1);
 
 	initializeTermMapping();
 	return make_pair<float,float>(
@@ -82,29 +82,38 @@ Anchor loadAnchor(Json::Value def){
 	props[1] = "localanchor";
 	props[2] = "offset";
 
-	for (int i=0; i<3; i++){
-		if (def[props[i]].isNull()){
+	for (int i=0; i<3; i++) {
+		if (def[props[i]].isNull()) {
 			cerr << props[i] << "missing from definition:\n";
 			cerr << def;
 			exit(1);
-		}		
+		}
 	}
 
-	return Anchor{
+	return Anchor {
 		.worldAnchor = parseFloatPair(def["worldanchor"]),
 		.localAnchor = parseFloatPair(def["localanchor"]),
 		.offset = parseIntPair(def["offset"]),
+		.width = (def["width"].isNull() ? 0 : def["width"].asInt()),
+		.height = (def["height"].isNull() ? 0 : def["height"].asInt())
 	};
 }
 
 pair<int, int> getAnchorOffset(Anchor *a){
+	printf("a->width %d\n", a->width);
     return pair<float,float>(
         (int) (Spectrum_screenbounds.w * a->worldAnchor.first) +
-        a->offset.first,
+	        a->offset.first -
+	        (int) ((a->localAnchor.first < 0.000001 ?
+	        	0 : 
+	        	a->localAnchor.first * a->width)),
 
         (int)(Spectrum_screenbounds.h * a->worldAnchor.second) +
-        a->offset.second
-        );
+	        a->offset.second -
+	        (int)((a->localAnchor.second < 0.000001 ?
+	        	0 : 
+	        	a->localAnchor.second * a->height))
+	    );
 }
 
 
@@ -121,10 +130,13 @@ string anchorRepr(Anchor a){
 		a.worldAnchor.second,
 		
 		a.localAnchor.first,
-		a.localAnchor.first,
+		a.localAnchor.second,
 
 		a.offset.first,
-		a.offset.first
+		a.offset.second,
+
+		a.width,
+		a.height
 		);
 	return out;
 }

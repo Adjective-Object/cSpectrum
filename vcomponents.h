@@ -35,7 +35,9 @@ class SimpleBarEq : public EQComponent{
 	int nBars;
 	long color;
 
-	int height, barwidth, barpadding;
+	int barwidth, barpadding;
+
+	bool direction;
 
 	//cached values for optimization
 	std::pair<int, int> offset;
@@ -43,7 +45,7 @@ class SimpleBarEq : public EQComponent{
 
 public:
 	SimpleBarEq(Anchor anchorPt, int numBars, Uint32 barColor,
-		int height, int barpadding, int barwidth);
+		int barpadding, int barwidth, bool direction);
 	void renderToSurface(
 		SDL_Surface *targetSurface, 
 		int timeStepMillis);

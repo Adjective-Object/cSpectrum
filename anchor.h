@@ -8,6 +8,8 @@ typedef struct Anchor {
 	std::pair<float, float> worldAnchor;
 	std::pair<float, float> localAnchor;
 	std::pair<int, int> offset;
+	int width;
+	int height;
 } Anchor;
 
 std::string anchorRepr(Anchor a);

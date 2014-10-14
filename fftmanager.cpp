@@ -4,19 +4,31 @@
 
 using namespace std;
 
+static vector<float> rootbin;
+static map<int, vector<float>> cachedbins = map<int, vector<float>>();
+
 //TODO implement this
-vector<float> compressBars(vector<float> *bins, int nbars){
-    vector<float> newvector = vector<float>(nbars);
-    for (int i=0; i<nbars; i++){
-        newvector[i] = 0;
+vector<float> compressBars(vector<float> *bins, int nBars){
+    vector<float> newvector = vector<float>(nBars);
+    
+    float step = 1.0f / nBars, sum;
+    int rootStop = 0;
+
+    for (int i=0; i<nBars; i++){
+        int stop = (step*(i+1)) * bins->size();
+        sum = 0;
+        for (int x=rootStop; x<stop; x++) {
+            sum = sum + (*bins)[x];
+        }
+        newvector[i] = sum / (float)(stop - rootStop);
+        rootStop = stop;
+
     }
     return newvector;
 }
 
 //TODO optimize this so the float vectors are on heap
 //so we can get a faster initialization
-static vector<float> rootbin;
-static map<int, vector<float>> cachedbins = map<int, vector<float>>();
 void FFT_setFrameBin(vector<float> fftbin){
     rootbin = fftbin;
     cachedbins.clear();

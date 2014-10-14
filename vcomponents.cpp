@@ -21,9 +21,9 @@ EQComponent *makeSimpleBarEq(Json::Value def){
 		loadAnchor(def),
 		def["barcount"].asInt(), 
 		(unsigned int) stol(def["color"].asString(), NULL, 16),
-		def["height"].asInt(),
 		def["barpadding"].asInt(),
-		def["barwidth"].asInt()
+		def["barwidth"].asInt(),
+		def["direction"].asBool()
 	);
 }
 
@@ -86,17 +86,22 @@ vector<EQComponent *> getComponentVectors(Json::Value components) {
 // Simple Bar EQ
 
 SimpleBarEq::SimpleBarEq(
-	Anchor anchorPt, int numBars, Uint32 barColor,
-	int height, int barpadding, int barwidth){
+	Anchor anchorPt, int numBars, Uint32 barColor, 
+	int barpadding, int barwidth, bool direction){
 
+	anchorPt.width = 
+		(numBars * barwidth) + 
+		((numBars - 1) * barpadding);
+	
 	//internals
 	this->anchor = anchorPt;
 	this->nBars = numBars;
 	this->color = barColor;
-	this->height = height;
+
 	this->barpadding = barpadding;
 	this->barwidth = barwidth;
 
+	this->direction = direction;
 	this->offset = getAnchorOffset(&anchorPt);
 
 	this->drawrect = SDL_Rect{
@@ -123,11 +128,36 @@ void SimpleBarEq::renderToSurface(
 
 	vector<float> *bars = FFT_getBins(this->nBars);
 
-	for(uint i = this->nBars; i>0; i--){
+	/*
+	for (auto c : *bars)
+		cout << c << ' ';
+	cout << endl;
+	*/
+
+	for(uint i = 0; i<this->nBars; i++){
 		this->drawrect.x = 
 			this->offset.first + 
 			i * (this->barwidth + this->barpadding);
-		this->drawrect.h = this->height * (*bars)[i];
+
+		if(this->direction){
+			//downward
+			this->drawrect.h = anchor.height * (*bars)[i];
+		} else{
+			//upward
+			this->drawrect.h = anchor.height * (*bars)[i];
+			this->drawrect.y = 
+				this->offset.second +
+				this->anchor.height -
+				this->drawrect.h;
+		}
+
+		/*
+		printf("(draw rect %d %d %d %d)\n",
+			this->drawrect.x,
+			this->drawrect.y,
+			this->drawrect.w,
+			this->drawrect.h);
+		*/
 
 		SDL_FillRect(surface, &(this->drawrect), this->color);
 	}

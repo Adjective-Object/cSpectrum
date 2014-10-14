@@ -13,14 +13,15 @@
 		{
 			"type" : "bareq",
 			"worldanchor" : "bottom left",
-			"localanchor" : "bottom right",
+			"localanchor" : "bottom left",
 			
 			"height" : 100,
-			"barpadding" : 10,
-			"barwidth" : 10,
+			"direction" : false,
+			"barpadding" : 30,
+			"barwidth" : 2,
 			
-			"offset" : [0,100],
-			"color" : "ff0000ff", //needs to be rgba
+			"offset" : [32, -32],
+			"color" : "ffffff", //needs to be rgba
 			"barcount" : 12
 		},
 
