@@ -15,7 +15,7 @@ typedef struct Anchor {
 std::string anchorRepr(Anchor a);
 Anchor loadAnchor(Json::Value def);
 
-std::pair<int, int> getAnchorOffset(Anchor *a);
+std::pair<int, int> Anchor_GetOffset(Anchor *a);
 
 std::string anchorRepr(Anchor a);
 

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 extern SDL_Rect Spectrum_screenbounds;
-extern SDL_PixelFormat *Spectrum_screenformat;
+extern SDL_Renderer *Spectrum_renderer;
 extern float Spectrum_screenratio;
 extern bool verbose;
 
@@ -17,7 +17,7 @@ extern bool verbose;
 class EQComponent{
 public:
 	virtual void renderToSurface(
-		SDL_Surface *targetSurface, 
+		SDL_Renderer *renderer, 
 		int timeStepMillis) {};
 	virtual std::string repr() {return "<EQComponent with unimplented repr>";};
 };
@@ -33,7 +33,8 @@ class SimpleBarEq : public EQComponent{
 	Anchor anchor;
 
 	int nBars;
-	long color;
+	Uint8 alpha;
+	SDL_Color color;
 
 	int barwidth, barpadding;
 
@@ -44,10 +45,10 @@ class SimpleBarEq : public EQComponent{
 	SDL_Rect drawrect;
 
 public:
-	SimpleBarEq(Anchor anchorPt, int numBars, Uint32 barColor,
+	SimpleBarEq(Anchor anchorPt, int numBars, SDL_Color color,
 		int barpadding, int barwidth, bool direction);
 	void renderToSurface(
-		SDL_Surface *targetSurface, 
+		SDL_Renderer *renderer, 
 		int timeStepMillis);
 
 	std::string repr();
@@ -58,18 +59,25 @@ class TextComponent : public EQComponent {
 	Anchor anchor;
 	std::string text;
 	TTF_Font *font;
+	SDL_Color color;
+
+	//cached values for optimization
+	SDL_Rect drawrect;
+	SDL_Texture *textTexture;
 
 public:
-	TextComponent(Anchor a, std::string txt, TTF_Font *dfont);
+	TextComponent(Anchor a, std::string txt, 
+			TTF_Font *dfont, SDL_Color c);
+
 	void renderToSurface(
-		SDL_Surface *targetSurface, 
+		SDL_Renderer *renderer, 
 		int timeStepMillis);
 	
 	std::string repr();
 };
 
 class BackgroundImage : public EQComponent{
-	SDL_Surface *image;
+	SDL_Texture *image;
 	std::string path;
 
 public:
@@ -77,7 +85,7 @@ public:
 	~BackgroundImage();
 	std::string repr();
 	void renderToSurface(
-		SDL_Surface *targetSurface, 
+		SDL_Renderer *renderer, 
 		int timeStepMillis);
 };
 

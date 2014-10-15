@@ -8,4 +8,5 @@ SDL_Surface *ScaledCroppedCopy(
     SDL_Surface *source, 
     SDL_Rect destDim);
 
+SDL_Color decodeColor(std::string color);
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
-#include <time.h>
+#include <sys/time.h>
+#include <sys/unistd.h>
 #include <stdlib.h>
 #include "json/json.h"
 #include "SDL2/SDL.h"
@@ -7,16 +8,17 @@
 #include "SDL2/SDL_image.h"
 #include "song.h"
 #include "vcomponents.h"
+#include "spectrumutil.h"
 #include "fftmanager.h"
 
 using namespace std;
 
 SDL_Rect Spectrum_screenbounds;
-SDL_PixelFormat *Spectrum_screenformat;
 float Spectrum_screenratio;
 
 SDL_Window *gWindow;
-SDL_Surface *gScreenSurface;
+SDL_Renderer *Spectrum_renderer;
+
 int xresolution;
 int yresolution;
 
@@ -96,7 +98,7 @@ Json::Value loadJsonCfg(char *cfgfilename){
 	return root;
 }
 
-void fakeBuffer(vector<float> *fftbuffer) {
+void makeFakeBuffer(vector<float> *fftbuffer) {
 	for(uint i=0; i<fftbuffer->size(); i++){
 		(*fftbuffer)[i] = rand()/ (float)(RAND_MAX);
 	}
@@ -104,13 +106,17 @@ void fakeBuffer(vector<float> *fftbuffer) {
 
 void mainloop(Json::Value config, vector<EQComponent *> components) {
 
-	Uint32 bkgfill = stoi(config["bkgfill"].asString(), NULL, 16);
+	SDL_Color bkgfill = decodeColor(config["bkgfill"].asString());
 
 	printf("entering main loop (%d, %d)\n",
 			xresolution, yresolution);
 
 	//fftbuffer
 	vector<float> fftbuffer(100);
+
+	struct timeval lastframe, tp;
+	gettimeofday(&lastframe, NULL);
+	long int dtime = 1000000/60;
 
 	SDL_Event e;
 	bool quit = false;
@@ -122,29 +128,35 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 			}
 		}
 
-		fakeBuffer(&fftbuffer);
+		makeFakeBuffer(&fftbuffer);
 
-		/*
-		for (auto c : fftbuffer)
-    		cout << c << ' ';
-    	cout << endl;
-		*/
+		SDL_SetRenderDrawColor(
+			Spectrum_renderer,
+			bkgfill.r,
+			bkgfill.g,
+			bkgfill.b,
+			bkgfill.a);
 
-		SDL_FillRect(gScreenSurface, 
-				&Spectrum_screenbounds,
-				bkgfill
-			);
-
+		SDL_RenderClear(Spectrum_renderer);
 		FFT_setFrameBin(fftbuffer);
 
 		for (uint i=0; i<components.size(); i++){
 			components[i]->renderToSurface(
-				gScreenSurface, 
+				Spectrum_renderer,
 				100);
 		}
 
-		//TODO sleeping remainder time to framerate cap
-		SDL_UpdateWindowSurface(gWindow);
+		//sleep time
+		gettimeofday(&tp, NULL); 
+		long int tpms = tp.tv_sec * 1000000 + tp.tv_usec;
+		long int lfms = lastframe.tv_sec * 1000000 + lastframe.tv_usec;
+		if(lfms - tpms + dtime > 0){
+			usleep(lfms - tpms + dtime);
+		}
+		//printf("%ld\n", lfms - tpms + dtime);
+		lastframe = tp;
+
+		SDL_RenderPresent(Spectrum_renderer);
 
 	}
 }
@@ -169,9 +181,9 @@ void initWindow(Json::Value config){
 		xresolution, 
 		yresolution, 
 		SDL_WINDOW_SHOWN );
-    gScreenSurface = SDL_GetWindowSurface( gWindow );
-    Spectrum_screenformat = gScreenSurface->format;
-
+    Spectrum_renderer = SDL_CreateRenderer( gWindow, -1, 0);
+    SDL_SetRenderDrawBlendMode(Spectrum_renderer,
+                               SDL_BLENDMODE_BLEND);
 }
 
 int main (int argc, char *argv []) {

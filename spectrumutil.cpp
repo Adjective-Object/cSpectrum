@@ -49,3 +49,13 @@ SDL_Surface *ScaledCroppedCopy(
     SDL_BlitScaled(source, &srcRect, destSurf, &destDim);
     return destSurf;
 }
+
+SDL_Color decodeColor(string strcolor){
+    Uint32 bitcolor = (unsigned int) stol(strcolor, NULL, 16);
+    return SDL_Color{
+        .r = (Uint8)( (bitcolor & 0xff000000) / 0x1000000 ),
+        .g = (Uint8)( (bitcolor & 0x00ff0000) / 0x0010000 ),
+        .b = (Uint8)( (bitcolor & 0x0000ff00) / 0x0000100 ),
+        .a = (Uint8)( bitcolor & 0x000000ff )
+    };
+}

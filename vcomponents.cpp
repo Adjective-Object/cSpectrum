@@ -20,7 +20,7 @@ EQComponent *makeSimpleBarEq(Json::Value def){
 	return new SimpleBarEq(
 		loadAnchor(def),
 		def["barcount"].asInt(), 
-		(unsigned int) stol(def["color"].asString(), NULL, 16),
+		decodeColor(def["color"].asString()),
 		def["barpadding"].asInt(),
 		def["barwidth"].asInt(),
 		def["direction"].asBool()
@@ -28,14 +28,18 @@ EQComponent *makeSimpleBarEq(Json::Value def){
 }
 
 EQComponent *makeTextComponent(Json::Value def){
+	printf("%s %d\n",
+		("./assets/" + def["font"].asString() + ".ttf").c_str(),
+		def["fontsize"].asInt());
+
 	return new TextComponent(
 		loadAnchor(def),
 		def["text"].asString(), 
 		TTF_OpenFont(
-			 //TODO use sysfonts dir 
 			("./assets/" + def["font"].asString() + ".ttf").c_str(),
 			def["fontsize"].asInt()
-		)
+		),
+		decodeColor(def["color"].asString())
 	);
 }
 
@@ -86,7 +90,7 @@ vector<EQComponent *> getComponentVectors(Json::Value components) {
 // Simple Bar EQ
 
 SimpleBarEq::SimpleBarEq(
-	Anchor anchorPt, int numBars, Uint32 barColor, 
+	Anchor anchorPt, int numBars, SDL_Color barColor,
 	int barpadding, int barwidth, bool direction){
 
 	anchorPt.width = 
@@ -97,12 +101,13 @@ SimpleBarEq::SimpleBarEq(
 	this->anchor = anchorPt;
 	this->nBars = numBars;
 	this->color = barColor;
+	this->alpha = alpha;
 
 	this->barpadding = barpadding;
 	this->barwidth = barwidth;
 
 	this->direction = direction;
-	this->offset = getAnchorOffset(&anchorPt);
+	this->offset = Anchor_GetOffset(&anchorPt);
 
 	this->drawrect = SDL_Rect{
 		.x = 0,
@@ -123,7 +128,7 @@ string SimpleBarEq::repr() {
 }
 
 void SimpleBarEq::renderToSurface(
-		SDL_Surface *surface, 
+		SDL_Renderer *renderer, 
 		int timeStepMillis){
 
 	vector<float> *bars = FFT_getBins(this->nBars);
@@ -151,25 +156,54 @@ void SimpleBarEq::renderToSurface(
 				this->drawrect.h;
 		}
 
-		/*
-		printf("(draw rect %d %d %d %d)\n",
-			this->drawrect.x,
-			this->drawrect.y,
-			this->drawrect.w,
-			this->drawrect.h);
-		*/
-
-		SDL_FillRect(surface, &(this->drawrect), this->color);
+		SDL_SetRenderDrawColor(renderer, 
+			this->color.r,
+			this->color.g,
+			this->color.b,
+			this->color.a);
+		SDL_RenderFillRect(renderer, &(this->drawrect));
 	}
 }
 
 
 // Text Components
 
-TextComponent::TextComponent(Anchor a, string txt, TTF_Font *dfont){
-	anchor = a;
-	text = txt;
-	font = dfont;
+TextComponent::TextComponent(
+	Anchor a, string txt,TTF_Font *dfont, SDL_Color c){
+
+	this->text = txt;
+	this->font = dfont;
+	this->color = c;
+
+	TTF_SizeText(dfont, txt.c_str(), &(a.width), &(a.height));
+
+	this->anchor = a;
+
+	pair<int, int> offset = Anchor_GetOffset(&a);
+	this->drawrect = SDL_Rect {
+		.x = offset.first,
+		.y = offset.second,
+		.w = a.width,
+		.h = a.height
+	};
+
+	printf("drawrect: %d %d %d %d\n", 
+		this->drawrect.x,
+		this->drawrect.y,
+		this->drawrect.w,
+		this->drawrect.h);
+
+	SDL_Surface *s = TTF_RenderText_Blended(
+						dfont, txt.c_str(),
+						this->color);
+
+	this->textTexture = SDL_CreateTextureFromSurface(
+						Spectrum_renderer, 
+						s);
+
+	SDL_SetTextureAlphaMod(this->textTexture, c.a);
+
+	SDL_FreeSurface(s);
 }
 
 string TextComponent::repr() {
@@ -180,16 +214,18 @@ string TextComponent::repr() {
 			text.c_str(), 
 			(font != NULL) ? 
 				TTF_FontFaceFamilyName(font) : "NULL",
-			anchorRepr(anchor).c_str()
-		);
+			anchorRepr(anchor).c_str());
 
 	return out;
 }
 
 void TextComponent::renderToSurface(
-		SDL_Surface *texture, 
+		SDL_Renderer *renderer, 
 	int timeStepMillis){
-	//TODO
+
+	SDL_RenderCopy(
+		renderer, this->textTexture, 
+		NULL, &(this->drawrect));
 }
 
 
@@ -216,19 +252,19 @@ BackgroundImage::BackgroundImage(string imgpath){
 	if (verbose) 
 		cout << "converting surface"  << endl;
 
-	this->image = SDL_ConvertSurface(
-		scaledSurface, 
-		Spectrum_screenformat,
-		0);
+	this->image = SDL_CreateTextureFromSurface(
+		Spectrum_renderer,
+		scaledSurface);
 
 	if (verbose)
 		cout << "freeing temp surface" <<endl;
 
+	SDL_FreeSurface(scaledSurface);
 	SDL_FreeSurface(loadedSurface);
 }
 
 BackgroundImage::~BackgroundImage(){
-	SDL_FreeSurface( this->image );
+	SDL_DestroyTexture( this->image );
 }
 
 string BackgroundImage::repr(){
@@ -236,12 +272,11 @@ string BackgroundImage::repr(){
 }
 
 void BackgroundImage::renderToSurface(
-	SDL_Surface *targetSurface, 
+	SDL_Renderer *renderer, 
 	int timeStepMillis){
 
-	SDL_BlitSurface(
-		this->image, NULL,
-		targetSurface, NULL
+	SDL_RenderCopy(
+		renderer,
+		this->image, NULL, NULL
 		);
-
 }

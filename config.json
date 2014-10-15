@@ -2,8 +2,8 @@
 	"version" : "0a", // version of the config file's format
 	
 	"config" : {
-		"resolution" : [800, 600],
-		"bkgfill" : "ffffff"
+		"resolution" : [800, 450],
+		"bkgfill" : "FFFFFFff" //colors are specified in rgba
 	},
 	"components" : [
 		{
@@ -14,36 +14,58 @@
 			"type" : "bareq",
 			"worldanchor" : "bottom left",
 			"localanchor" : "bottom left",
+			"offset" : [32, -32],
 			
 			"height" : 100,
+
 			"direction" : false,
 			"barpadding" : 30,
-			"barwidth" : 2,
-			
-			"offset" : [32, -32],
-			"color" : "ffffff", //needs to be rgba
+			"barwidth" : 20,
+
+			"color" : "FFFFFFAA",
 			"barcount" : 12
 		},
 
 		{
+			"type" : "bareq",
+			"worldanchor" : "bottom left",
+			"localanchor" : "bottom left",
+			"offset" : [32, -100],
+			
+			"height" : 100,
+
+			"direction" : false,
+			"barpadding" : 15,
+			"barwidth" : 7,
+
+			"color" : "FFFFFFAA",
+			"barcount" : 24
+		},
+
+		{
 			"type" : "text",
-			"worldanchor" : "middle middle",
-			"localanchor" : "middle left",
-			"offset": [1,10],
-			"font" : "Lato-Regular",
-			"fontsize": 24,
-			"text" : "TEST TEXT"
+			"worldanchor" : "middle left",
+			"localanchor" : "bottom left",
+			"offset": [32,0],
+
+			"font" : "Adec-Regular",
+			"fontsize": 64,
+			"text" : "ADEC-REGULAR",
+			"color" : "FFFFFFcc"
 		},
 
 
 		{
 			"type" : "text",
-			"worldanchor" : "1/12 middle",
-			"localanchor" : "middle middle",
-			"offset": [-1,-100],
-			"font" : "Airbag-Regular",
+			"worldanchor" : "middle left",
+			"localanchor" : "top left",
+			"offset": [32,0],
+
+			"font" : "Adec-Regular",
 			"fontsize": 24,
-			"text" : "TEST TEXT 2"
+			"text" : "this is more example text",
+			"color" : "FFFFFFaa"
 		}
+
 	]
 }

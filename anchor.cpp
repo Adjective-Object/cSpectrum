@@ -26,7 +26,12 @@ void initializeTermMapping(){
 
 float pFloat(string s) {
 	if (tMap.find(s) == tMap.end()){
-		return stof(s);
+		int index;
+		if ((index = s.find("/")) != string::npos){
+			return stof(s.substr(0,index)) / stof(s.substr(index+1));
+		} else{
+			return stof(s);
+		}
 	} else{
 		return tMap[s];
 	}
@@ -99,7 +104,7 @@ Anchor loadAnchor(Json::Value def){
 	};
 }
 
-pair<int, int> getAnchorOffset(Anchor *a){
+pair<int, int> Anchor_GetOffset(Anchor *a){
 	printf("a->width %d\n", a->width);
     return pair<float,float>(
         (int) (Spectrum_screenbounds.w * a->worldAnchor.first) +
