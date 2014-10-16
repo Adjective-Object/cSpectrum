@@ -37,6 +37,7 @@ protected:
 	int nBars;
 	int length;
 	int eqheight;
+	bool reversed;
 
 	Direction direction;
 
@@ -45,7 +46,7 @@ protected:
 
 public:
 	LinearEq(
-		Anchor anchorPt, Direction direction, int numBars);
+		Anchor anchorPt, Direction direction, int numBars, bool reversed);
 	virtual void renderToSurface(
 		SDL_Renderer *renderer, 
 		int timeStepMillis) {};
@@ -66,7 +67,7 @@ class SimpleBarEq : public LinearEq{
 
 public:
 	SimpleBarEq(
-		Anchor anchorPt, Direction direction, int numBars, 
+		Anchor anchorPt, Direction direction, int numBars, bool reversed, 
 			SDL_Color barColor, int barwidth);
 	~SimpleBarEq();
 

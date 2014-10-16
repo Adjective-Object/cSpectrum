@@ -22,6 +22,7 @@ EQComponent *makeSimpleBarEq(Json::Value def){
 		loadAnchor(def),
 		decodeDirection(def["direction"].asString()),
 		def["barcount"].asInt(), 
+		def["reversed"].asBool(),
 
 		decodeColor(def["color"].asString()),
 		def["barwidth"].asInt()

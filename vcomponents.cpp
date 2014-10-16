@@ -8,12 +8,16 @@
 #include "spectrumutil.h"
 #include "anchor.h"
 #include "vcomponents.h"
+
 using namespace std;
 
 // Linear Eq
+//TODO easing
 LinearEq::LinearEq(
-	Anchor anchorPt, Direction direction, int numBars) {
+	Anchor anchorPt, Direction direction, int numBars, 
+	bool reversed) {
 
+	this->reversed = reversed;
 	this->anchor 	= anchorPt;
 	this->direction = direction;
 	this->nBars 	= numBars;
@@ -32,9 +36,9 @@ LinearEq::LinearEq(
 // Simple Bar EQ
 
 SimpleBarEq::SimpleBarEq(
-		Anchor anchor, Direction direction, int numBars, 
+		Anchor anchor, Direction direction, int numBars, bool reversed,
 			SDL_Color barColor, int barwidth)
-	: LinearEq(anchor, direction, numBars) {
+	: LinearEq(anchor, direction, numBars, reversed) {
 	
 	//set internals
 	this->color = barColor;
@@ -95,14 +99,16 @@ void SimpleBarEq::renderToSurface(
 	*/
 
 	for(uint i = 0; i<this->nBars; i++){
+		
+		int reg = (this->reversed ? this->nBars - 1 - i : i);
 		if(this->direction == South || this->direction == North) {
 			this->drawrect.x = 
 				this->offset.first + 
-				(int)(i * (this->barwidth + this->barpadding));			
+				(int)(reg * (this->barwidth + this->barpadding));
 		} else{
 			this->drawrect.y = 
 				this->offset.second + 
-				(int)(i * (this->barwidth + this->barpadding));
+				(int)(reg * (this->barwidth + this->barpadding));
 		}
 
 		if(this->direction == South){

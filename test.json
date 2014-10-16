@@ -1,0 +1,113 @@
+{
+	"version" : "0a", // version of the config file's format
+	
+	"config" : {
+		"resolution" : [800, 450],
+		"bkgfill" : "FFFFFFff" //colors are specified in rgba
+	},
+	"components" : [
+		{
+			"type" : "bkgimg",
+			"img" : "assets/house_by_the_sea.bmp"
+		},
+		{
+			"type" : "bareq",
+			"easing": "none",
+			"reversed": false,
+
+			"worldanchor" : "bottom left",
+			"localanchor" : "bottom left",
+			"offset" : [32, -32],
+			"height" : 100,
+			"width" : 386,
+			
+			"color" : "FFFFFFAA",
+			"direction" : "North",
+			"barcount" : 12,
+			"barwidth" : 20
+		},
+
+
+		{
+			"type" : "bareq",
+			"easing": "none",
+			"reversed": true,
+
+			"worldanchor" : "bottom left",
+			"localanchor" : "bottom left",
+			"offset" : [32, -192],
+			"height" : 100,
+			"width" : 386,
+			
+
+			"color" : "FFFFFFAA",
+			"direction" : "South",
+			"barcount" : 24,
+			"barwidth" : 7
+
+		},
+
+		{
+			"type" : "bareq",
+			"easing": "none",
+			"reversed": false,
+
+			"worldanchor" : "bottom left",
+			"localanchor" : "bottom left",
+			"offset" : [32, -92],
+			"height" : 100,
+			"width" : 386,
+			
+
+			"color" : "FFFFFFAA",
+			"direction" : "South",
+			"barcount" : 24,
+			"barwidth" : 7
+
+		},
+
+		{
+			"type" : "bareq",
+			"easing": "none",
+			"reversed": false,
+
+			"worldanchor" : "bottom right",
+			"localanchor" : "bottom right",
+			"offset" : [-32, -32],
+			"height" : 386,
+			"width" : 100,
+			
+
+			"color" : "FFFFFFAA",
+			"direction" : "West",
+			"barcount" : 64,
+			"barwidth" : 2
+		},
+
+		{
+			"type" : "text",
+			"worldanchor" : "1/4 left",
+			"localanchor" : "bottom left",
+			"offset": [32,0],
+
+			"font" : "Adec-Title",
+			"fontsize": 64,
+			"text" : "Example Text",
+			"color" : "FFFFFFcc"
+		},
+
+
+		{
+			"type" : "text",
+			"worldanchor" : "1/4 left",
+			"localanchor" : "top left",
+			"offset": [32,0],
+
+			"font" : "Adec-Text",
+			"fontsize": 24,
+			"text" : "this is more example text",
+			"color" : "FFFFFFaa"
+		}
+
+	]
+}
