@@ -1,1 +1,1 @@
-./spectrum -v -p haze.mp3 config.json
+./spectrum -v -p haze.mp3 test.json
