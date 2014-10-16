@@ -8,7 +8,7 @@
 	"components" : [
 		{
 			"type" : "bkgimg",
-			"img" : "assets/newd.bmp"
+			"img" : "assets/house_by_the_sea.bmp"
 		},
 		{
 			"type" : "bareq",
