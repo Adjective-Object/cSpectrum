@@ -10,111 +10,66 @@
 #include "vcomponents.h"
 using namespace std;
 
+// Linear Eq
+LinearEq::LinearEq(
+	Anchor anchorPt, Direction direction, int numBars) {
 
-//
-// Actual parsing of components
-// TODO all verification of anything at all
-//
+	this->anchor 	= anchorPt;
+	this->direction = direction;
+	this->nBars 	= numBars;
 
-EQComponent *makeSimpleBarEq(Json::Value def){
-	return new SimpleBarEq(
-		loadAnchor(def),
-		def["barcount"].asInt(), 
-		decodeColor(def["color"].asString()),
-		def["barpadding"].asInt(),
-		def["barwidth"].asInt(),
-		def["direction"].asBool()
-	);
-}
-
-EQComponent *makeTextComponent(Json::Value def){
-	printf("%s %d\n",
-		("./assets/" + def["font"].asString() + ".ttf").c_str(),
-		def["fontsize"].asInt());
-
-	return new TextComponent(
-		loadAnchor(def),
-		def["text"].asString(), 
-		TTF_OpenFont(
-			("./assets/" + def["font"].asString() + ".ttf").c_str(),
-			def["fontsize"].asInt()
-		),
-		decodeColor(def["color"].asString())
-	);
-}
-
-EQComponent *makeBackgroundImage(Json::Value def){
-	return new BackgroundImage(def["img"].asString());
-}
-
-//
-// Mapping of component names to the parsing functions
-//
-
-static bool cMapInited = false;
-static map<string, EQComponent *(*)(Json::Value)>cMap;
-
-void initializeComponentMapping(){
-	if(!cMapInited){
-		cMapInited = true;
-
-		cMap["bareq"] = makeSimpleBarEq;
-		cMap["text"] = makeTextComponent;
-		cMap["bkgimg"] = makeBackgroundImage;
+	if (direction == North || direction == South) {
+		this->eqheight 	= anchorPt.height;
+		this->length 	= anchorPt.width;
 	}
-}
-
-
-
-vector<EQComponent *> getComponentVectors(Json::Value components) {
-	initializeComponentMapping();
-
-	vector<EQComponent *> clist = vector<EQComponent *>(components.size());
-
-	for (int i=0; i<components.size(); i++){
-		string compType = components[i]["type"].asString();
-		if (cMap.find(compType) == cMap.end()){
-			cout <<
-				"error: no entry for %s" <<
-				compType;
-		} else{
-			clist[i] = cMap[compType](components[i]);
-		}
+	else {
+		this->eqheight 	= anchorPt.width;
+		this->length 	= anchorPt.height;
 	}
 
-	return clist;
 }
-
-
 
 // Simple Bar EQ
 
 SimpleBarEq::SimpleBarEq(
-	Anchor anchorPt, int numBars, SDL_Color barColor,
-	int barpadding, int barwidth, bool direction){
-
-	anchorPt.width = 
-		(numBars * barwidth) + 
-		((numBars - 1) * barpadding);
+		Anchor anchor, Direction direction, int numBars, 
+			SDL_Color barColor, int barwidth)
+	: LinearEq(anchor, direction, numBars) {
 	
-	//internals
-	this->anchor = anchorPt;
-	this->nBars = numBars;
+	//set internals
 	this->color = barColor;
-	this->alpha = alpha;
-
-	this->barpadding = barpadding;
 	this->barwidth = barwidth;
 
-	this->direction = direction;
-	this->offset = Anchor_GetOffset(&anchorPt);
 
-	this->drawrect = SDL_Rect{
-		.x = 0,
-		.y = this->offset.second,
-		.w = barwidth,
-		.h = 0
-	};
+	//cache values for optimization
+	this->offset = Anchor_GetOffset(&anchor);
+
+	if(direction == North || direction == South){
+		this->drawrect = SDL_Rect{
+			.x = 0,
+			.y = this->offset.second,
+			.w = barwidth,
+			.h = 0
+		};
+
+		//calculate padding based on barwidth and width
+		this->barpadding = (float)
+								(anchor.width - (barwidth * numBars))
+								/ (numBars-1);
+	} else{
+		this->drawrect = SDL_Rect{
+			.x = this->offset.first,
+			.y = 0,
+			.w = 0,
+			.h = barwidth
+		};
+
+		//calculate padding based on barwidth and height
+		this->barpadding = (float)
+								(anchor.height - (barwidth * numBars))
+								/ (numBars-1);
+	}
+
 }
 
 string SimpleBarEq::repr() {
@@ -140,20 +95,37 @@ void SimpleBarEq::renderToSurface(
 	*/
 
 	for(uint i = 0; i<this->nBars; i++){
-		this->drawrect.x = 
-			this->offset.first + 
-			i * (this->barwidth + this->barpadding);
+		if(this->direction == South || this->direction == North) {
+			this->drawrect.x = 
+				this->offset.first + 
+				(int)(i * (this->barwidth + this->barpadding));			
+		} else{
+			this->drawrect.y = 
+				this->offset.second + 
+				(int)(i * (this->barwidth + this->barpadding));
+		}
 
-		if(this->direction){
+		if(this->direction == South){
 			//downward
 			this->drawrect.h = anchor.height * (*bars)[i];
-		} else{
+		} else if (this->direction == North){
 			//upward
 			this->drawrect.h = anchor.height * (*bars)[i];
 			this->drawrect.y = 
 				this->offset.second +
 				this->anchor.height -
 				this->drawrect.h;
+		} else if (this->direction == East) {
+			//to the right
+			this->drawrect.w = anchor.width * (*bars)[i];
+		} else if (this->direction == West) {
+			//to the left
+			this->drawrect.w = anchor.width * (*bars)[i];
+			this->drawrect.x = 
+				this->offset.first +
+				this->anchor.width -
+				this->drawrect.w;
+
 		}
 
 		SDL_SetRenderDrawColor(renderer, 

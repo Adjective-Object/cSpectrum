@@ -6,10 +6,12 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
 #include "SDL2/SDL_image.h"
-#include "song.h"
+
 #include "vcomponents.h"
 #include "spectrumutil.h"
 #include "fftmanager.h"
+#include "parsejson.h"
+#include "song.h"
 
 using namespace std;
 

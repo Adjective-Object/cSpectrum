@@ -1,6 +1,7 @@
-#include "SDL2/SDL.h"
 #include <iostream>
+#include <ctype.h>
 #include <string>
+#include "SDL2/SDL.h"
 #include "spectrumutil.h"
 
 using namespace std;
@@ -58,4 +59,20 @@ SDL_Color decodeColor(string strcolor){
         .b = (Uint8)( (bitcolor & 0x0000ff00) / 0x0000100 ),
         .a = (Uint8)( bitcolor & 0x000000ff )
     };
+}
+
+Direction decodeDirection(string value) {
+    char first = tolower( value.at(0) );
+    if( first == 'n'){
+        return North;
+    }
+    if( first == 'e'){
+        return East;
+    }
+    if( first == 's'){
+        return South;
+    }
+    if( first == 'w'){
+        return West;
+    }
 }

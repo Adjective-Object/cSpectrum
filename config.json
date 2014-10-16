@@ -17,36 +17,49 @@
 			"worldanchor" : "bottom left",
 			"localanchor" : "bottom left",
 			"offset" : [32, -32],
-			
 			"height" : 100,
-
-			"direction" : false,
-			"barpadding" : 30,
-			"barwidth" : 20,
-
+			"width" : 386,
+			
 			"color" : "FFFFFFAA",
-			"barcount" : 12
+			"direction" : "North",
+			"barcount" : 12,
+			"barwidth" : 20
 		},
 
 		{
 			"type" : "bareq",
 			"worldanchor" : "bottom left",
 			"localanchor" : "bottom left",
-			"offset" : [32, -100],
-			
+			"offset" : [32, -92],
 			"height" : 100,
-
-			"direction" : false,
-			"barpadding" : 15,
-			"barwidth" : 7,
+			"width" : 386,
+			
 
 			"color" : "FFFFFFAA",
-			"barcount" : 24
+			"direction" : "South",
+			"barcount" : 24,
+			"barwidth" : 7
+
+		},
+
+		{
+			"type" : "bareq",
+			"worldanchor" : "bottom right",
+			"localanchor" : "bottom right",
+			"offset" : [-32, -32],
+			"height" : 386,
+			"width" : 100,
+			
+
+			"color" : "FFFFFFAA",
+			"direction" : "West",
+			"barcount" : 64,
+			"barwidth" : 2
 		},
 
 		{
 			"type" : "text",
-			"worldanchor" : "middle left",
+			"worldanchor" : "1/4 left",
 			"localanchor" : "bottom left",
 			"offset": [32,0],
 
@@ -59,7 +72,7 @@
 
 		{
 			"type" : "text",
-			"worldanchor" : "middle left",
+			"worldanchor" : "1/4 left",
 			"localanchor" : "top left",
 			"offset": [32,0],
 

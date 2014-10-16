@@ -5,6 +5,7 @@
 #include "SDL2/SDL_ttf.h"
 #include "anchor.h"
 #include "fftmanager.h"
+#include "spectrumutil.h"
 #include <stdlib.h>
 
 extern SDL_Rect Spectrum_screenbounds;
@@ -12,8 +13,8 @@ extern SDL_Renderer *Spectrum_renderer;
 extern float Spectrum_screenratio;
 extern bool verbose;
 
-
-//perhaps bad nomenclature
+// perhaps bad nomenclature, not all
+// elements are "Equalizers" / FFT Visualizers
 class EQComponent{
 public:
 	virtual void renderToSurface(
@@ -22,31 +23,53 @@ public:
 	virtual std::string repr() {return "<EQComponent with unimplented repr>";};
 };
 
+/******************************************
+ * Begin Definitions of actual Components *
+ ******************************************/
 
-std::vector<EQComponent *> getComponentVectors(Json::Value components);
 
-//
-// The components
-//
-
-class SimpleBarEq : public EQComponent{
+/**
+ * A generic EQ
+ **/
+class LinearEq : public EQComponent{
+protected:
 	Anchor anchor;
-
 	int nBars;
-	Uint8 alpha;
-	SDL_Color color;
+	int length;
+	int eqheight;
 
-	int barwidth, barpadding;
-
-	bool direction;
+	Direction direction;
 
 	//cached values for optimization
 	std::pair<int, int> offset;
-	SDL_Rect drawrect;
 
 public:
-	SimpleBarEq(Anchor anchorPt, int numBars, SDL_Color color,
-		int barpadding, int barwidth, bool direction);
+	LinearEq(
+		Anchor anchorPt, Direction direction, int numBars);
+	virtual void renderToSurface(
+		SDL_Renderer *renderer, 
+		int timeStepMillis) {};
+	virtual std::string repr() {return "<Generic EQ with unimplented repr>";};
+
+};
+
+
+/**
+ * solid color bars
+ **/
+class SimpleBarEq : public LinearEq{
+	
+	SDL_Color color;
+	SDL_Rect drawrect;
+	int barwidth;
+	float barpadding;
+
+public:
+	SimpleBarEq(
+		Anchor anchorPt, Direction direction, int numBars, 
+			SDL_Color barColor, int barwidth);
+	~SimpleBarEq();
+
 	void renderToSurface(
 		SDL_Renderer *renderer, 
 		int timeStepMillis);
@@ -55,6 +78,9 @@ public:
 };
 
 
+/**
+ * It's just text
+ **/
 class TextComponent : public EQComponent {
 	Anchor anchor;
 	std::string text;
@@ -68,6 +94,7 @@ class TextComponent : public EQComponent {
 public:
 	TextComponent(Anchor a, std::string txt, 
 			TTF_Font *dfont, SDL_Color c);
+	~TextComponent();
 
 	void renderToSurface(
 		SDL_Renderer *renderer, 
@@ -76,6 +103,9 @@ public:
 	std::string repr();
 };
 
+/**
+ * Background Image that scales to fit screen
+ **/
 class BackgroundImage : public EQComponent{
 	SDL_Texture *image;
 	std::string path;
@@ -83,10 +113,13 @@ class BackgroundImage : public EQComponent{
 public:
 	BackgroundImage(std::string imgpath);
 	~BackgroundImage();
-	std::string repr();
+
 	void renderToSurface(
 		SDL_Renderer *renderer, 
 		int timeStepMillis);
+
+	std::string repr();
+
 };
 
 
