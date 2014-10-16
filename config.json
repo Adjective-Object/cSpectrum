@@ -12,6 +12,8 @@
 		},
 		{
 			"type" : "bareq",
+			"easing": "none",
+
 			"worldanchor" : "bottom left",
 			"localanchor" : "bottom left",
 			"offset" : [32, -32],
@@ -48,9 +50,9 @@
 			"localanchor" : "bottom left",
 			"offset": [32,0],
 
-			"font" : "Adec-Regular",
+			"font" : "Adec-Title",
 			"fontsize": 64,
-			"text" : "ADEC-REGULAR",
+			"text" : "Example Text",
 			"color" : "FFFFFFcc"
 		},
 
@@ -61,7 +63,7 @@
 			"localanchor" : "top left",
 			"offset": [32,0],
 
-			"font" : "Adec-Regular",
+			"font" : "Adec-Text",
 			"fontsize": 24,
 			"text" : "this is more example text",
 			"color" : "FFFFFFaa"
