@@ -165,11 +165,6 @@ TextComponent::TextComponent(
 		.h = a.height
 	};
 
-	printf("drawrect: %d %d %d %d\n", 
-		this->drawrect.x,
-		this->drawrect.y,
-		this->drawrect.w,
-		this->drawrect.h);
 
 	SDL_Surface *s = TTF_RenderText_Blended(
 						dfont, txt.c_str(),

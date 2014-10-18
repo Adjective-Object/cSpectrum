@@ -27,6 +27,9 @@ int yresolution;
 bool preview = 0;
 bool verbose = 0;
 
+char configBuffer[300];
+string configDirectory;
+
 void printHelpMessage(){
 	 cout << ("args format is spectrum <flags> [soundfile] [cfgfile]\n");
 	 cout << ("flags are:\n");
@@ -63,9 +66,17 @@ pair<char *, char *> parseArgs(int argc, char *argv[]){
 	char *soundfilename = argv[0];
 	char *cfgfilename = argv[1];
 
+	configDirectory = string(cfgfilename);
+	configDirectory = configDirectory.substr(0, configDirectory.find_last_of("/\\"));
+	if (configDirectory.find_last_of("/") == string::npos){
+		configDirectory = "./";
+	} else{
+	}
+
 	if(verbose) {
-		cout << "sound: "<< (soundfilename) << endl;
+		cout << " sound: "<< (soundfilename) << endl;
 		cout << "config: " << (cfgfilename) << endl;
+		cout << "cfgdir: " << (configDirectory) << endl;
 	}
 
 	return make_pair(soundfilename, cfgfilename);
@@ -195,6 +206,16 @@ int main (int argc, char *argv []) {
 	//soundfile, cfgfile
 	pair<char *, char *> parsed = parseArgs(argc, argv);
 	Json::Value root = loadJsonCfg(parsed.second);
+
+	//TODO parse file here
+
+
+	//set the cwd so that loading for the cfg file works
+	if (verbose) cout << "changing directory to config dir" <<endl;
+	chdir(configDirectory.c_str());
+	char cwd[1024];
+	getcwd(cwd, 1024);
+	if (verbose) cout << "working directory : " << cwd << endl;
 
 	//Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );

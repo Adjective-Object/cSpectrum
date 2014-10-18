@@ -105,7 +105,6 @@ Anchor loadAnchor(Json::Value def){
 }
 
 pair<int, int> Anchor_GetOffset(Anchor *a){
-	printf("a->width %d\n", a->width);
     return pair<float,float>(
         (int) (Spectrum_screenbounds.w * a->worldAnchor.first) +
 	        a->offset.first -

@@ -14,16 +14,12 @@ SDL_Surface *ScaledCroppedCopy(
     float srcRatio = (float)(source->w) / (float)(source->h);
     float destRatio = (float)(destDim.w) / (float)(destDim.h);
 
-    cout << "source ratio: " << srcRatio  << endl;
-    cout << "dest   ratio: " << destRatio << endl;
-
     SDL_Rect srcRect;
 
     if(destRatio > srcRatio){
         //destination is wider ratio than child
         //so fit child to width
         int cropheight = ((1/destRatio) * source->w);
-        cout << "fit height " << cropheight <<endl;
 
         srcRect = SDL_Rect{
             .x = 0,
@@ -34,7 +30,6 @@ SDL_Surface *ScaledCroppedCopy(
         //destination is taller ratio than child
         //so fit child to height
         int cropwidth = (int)(destRatio * source->h);
-        cout << "fit width " << cropwidth << endl;
 
         srcRect = SDL_Rect{
             .x = (cropwidth - source->h)/2,
