@@ -10,8 +10,13 @@
 
 extern SDL_Rect Spectrum_screenbounds;
 extern SDL_Renderer *Spectrum_renderer;
-extern float Spectrum_screenratio;
+extern double Spectrum_screenratio;
 extern bool verbose;
+
+typedef struct SimpleBarDims{
+	int barcount;
+	int barwidth;
+} SimpleBarDims;
 
 // perhaps bad nomenclature, not all
 // elements are "Equalizers" / FFT Visualizers

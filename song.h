@@ -1,13 +1,19 @@
 #ifndef SPECTRUM_SONG_INCLUDED
 #define SPECTRUM_SONG_INCLUDED
 
-static int const SPECTRUM_FRAME_SIZE = 4096;
 #include <iostream>
+#include <stdlib.h>
+#include <cstdio>
+#include <sys/unistd.h>
+#include <vector>
 
+
+static int const SPECTRUM_PLAYERBUFFCOMMAND = 100;
+static int const SPECTRUM_BUFFSIZE = 1024;
 
 // Handles all class metadata. Just a bunch of fancy getters and setters
 // All of the string data is on the heap
-class MetaDater{
+class MetaData{
 
     char *_title;
     char *_artist;
@@ -24,8 +30,8 @@ class MetaDater{
 
 public:
 
-    MetaDater(char *filename);
-    ~MetaDater();
+    MetaData(char *filename);
+    ~MetaData();
 
     //song metadata
     char *title()           {return _title;}
@@ -42,32 +48,34 @@ public:
     char *originalartist()  {return _originalartist;}
 };
 
-class Player{
-
-    //contents of the current frame (on the heap)
-    int *framedata;
+class SongReader{
 
     int _currentframe;
     int _totalframes;
 
-    FILE *stream;
-
 public:
+    
+    double *buffer;
 
-    Player(char *songstring);
-    ~Player();
+    SongReader(char *path);
+    ~SongReader();
 
     void next_frame(); //steps to the next frame
 
-    int *get_data()     {return framedata;}
-
-    int currentframe()  {return _currentframe;}
-    int totalframes()   {return _totalframes;}
+    int current_frame()  {return _currentframe;}
+    int total_frames()   {return _totalframes;}
 };
 
-typedef struct Song{
-    Player *player;
-    MetaDater *metadata;
-} Song;
+// simple container class for metadata and reader
+class Song{
+public:
+    SongReader *reader;
+    MetaData *metadata;
+
+    Song(char *filename) {
+       metadata = new MetaData(filename);
+       reader = new SongReader(filename);
+    }
+};
 
 #endif

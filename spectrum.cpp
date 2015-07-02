@@ -1,22 +1,24 @@
 #include <iostream>
 #include <sys/time.h>
 #include <sys/unistd.h>
-#include <stdlib.h>
 #include "json/json.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
-#include "SDL2/SDL_image.h"
 
 #include "vcomponents.h"
-#include "spectrumutil.h"
-#include "fftmanager.h"
+#include "fftparser.h"
 #include "parsejson.h"
 #include "song.h"
+#include "unistd.h"
+
+#include <fstream>
+#include <string>
+
 
 using namespace std;
 
 SDL_Rect Spectrum_screenbounds;
-float Spectrum_screenratio;
+double Spectrum_screenratio;
 
 SDL_Window *gWindow;
 SDL_Renderer *Spectrum_renderer;
@@ -24,11 +26,12 @@ SDL_Renderer *Spectrum_renderer;
 int xresolution;
 int yresolution;
 
-bool preview = 0;
-bool verbose = 0;
+bool preview = false;
+bool verbose = false;
 
 char configBuffer[300];
 string configDirectory;
+
 
 void printHelpMessage(){
 	 cout << ("args format is spectrum <flags> [soundfile] [cfgfile]\n");
@@ -38,6 +41,7 @@ void printHelpMessage(){
 
 	 exit(1);
 }
+
 
 pair<char *, char *> parseArgs(int argc, char *argv[]){
 	//usage is "spectrum soundfile cfgfile"q
@@ -82,54 +86,57 @@ pair<char *, char *> parseArgs(int argc, char *argv[]){
 	return make_pair(soundfilename, cfgfilename);
 }
 
+
 // this should probably put the tree on the heap so it doesn't need
 // to be passed down, buttfuckit.
 Json::Value loadJsonCfg(char *cfgfilename){
 	//load the config string
-	
-	char cfgstring[8192];
-	FILE *fp = fopen(cfgfilename, "r");
-	int tcount = 0;
-	int count;
-	while(0 < (count = fread(cfgstring+tcount, sizeof(char), 1024, fp))){
-		tcount = tcount + count;
-	}
-	cfgstring[tcount+1] = '\0';
 
-	// get the json tree from configstring
+    std::ifstream ifs(cfgfilename);
+    std::string cfgstring ( (std::istreambuf_iterator<char>(ifs) ),
+                            (std::istreambuf_iterator<char>()  ) );
 
-	Json::Value root;   // will contains the root value after parsing.
+    if (cfgstring == "") {
+        cout << "could not open " << cfgfilename << endl;
+        exit(1);
+    }
+
+	// get the json tree from config string
+	Json::Value root;   // will contain the root value after parsing.
 	Json::Reader reader;
 	bool parsingSuccessful = reader.parse( cfgstring, root );
 	if ( !parsingSuccessful ) {
 		// report to the user the failure and their locations in the document.
 		cout  << "Failed to parse configuration\n"
-				   << reader.getFormattedErrorMessages();
+			  << reader.getFormattedErrorMessages();
 		exit(1);
 	}
 
 	return root;
 }
 
-void makeFakeBuffer(vector<float> *fftbuffer) {
-	for(uint i=0; i<fftbuffer->size(); i++){
+void makeFakeBuffer(vector<double> *fftbuffer) {
+	for(size_t i=0; i<fftbuffer->size(); i++){
 		(*fftbuffer)[i] = rand()/ (float)(RAND_MAX);
 	}
 }
 
-void mainloop(Json::Value config, vector<EQComponent *> components) {
+void mainloop(Json::Value config, Song *song, vector<EQComponent *> components) {
 
 	SDL_Color bkgfill = decodeColor(config["bkgfill"].asString());
 
-	printf("entering main loop (%d, %d)\n",
+	printf("entering mainloop (%d, %d)\n",
 			xresolution, yresolution);
 
-	//fftbuffer
-	vector<float> fftbuffer(100);
+	// buffer for the fft output data
+    // TODO iniitialize with proper dimensions based on fft
+	vector<double> fftbuffer(SPECTRUM_BUFFSIZE);
 
 	struct timeval lastframe, tp;
 	gettimeofday(&lastframe, NULL);
 	long int dtime = 1000000/60;
+
+	FFTParser * parser = new FFTParser(song->reader->buffer);
 
 	SDL_Event e;
 	bool quit = false;
@@ -141,7 +148,11 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 			}
 		}
 
-		makeFakeBuffer(&fftbuffer);
+		// advance buffer and get fft data
+		song->reader->next_frame();
+		//makeFakeBuffer(&fftbuffer);
+		parser->doAnalysis(fftbuffer);
+
 
 		SDL_SetRenderDrawColor(
 			Spectrum_renderer,
@@ -150,7 +161,7 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 			bkgfill.b,
 			bkgfill.a);
 
-		SDL_RenderClear(Spectrum_renderer);
+        SDL_RenderClear(Spectrum_renderer);
 		FFT_setFrameBin(fftbuffer);
 
 		for (uint i=0; i<components.size(); i++){
@@ -164,7 +175,7 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 		long int tpms = tp.tv_sec * 1000000 + tp.tv_usec;
 		long int lfms = lastframe.tv_sec * 1000000 + lastframe.tv_usec;
 		if(lfms - tpms + dtime > 0){
-			usleep(lfms - tpms + dtime);
+			usleep((__useconds_t)(lfms - tpms + dtime));
 		}
 		//printf("%ld\n", lfms - tpms + dtime);
 		lastframe = tp;
@@ -173,6 +184,7 @@ void mainloop(Json::Value config, vector<EQComponent *> components) {
 
 	}
 }
+
 
 void initWindow(Json::Value config){
 	xresolution = config["resolution"][0].asInt();
@@ -194,39 +206,51 @@ void initWindow(Json::Value config){
 		xresolution, 
 		yresolution, 
 		SDL_WINDOW_SHOWN );
-    Spectrum_renderer = SDL_CreateRenderer( gWindow, -1, 0);
-    SDL_SetRenderDrawBlendMode(Spectrum_renderer,
-                               SDL_BLENDMODE_BLEND);
+	Spectrum_renderer = SDL_CreateRenderer( gWindow, -1, 0);
+	SDL_SetRenderDrawBlendMode(Spectrum_renderer,
+							   SDL_BLENDMODE_BLEND);
 }
+
 
 int main (int argc, char *argv []) {
 
-	if (verbose){cout << "decoding JSON" << endl;}
-
-	//soundfile, cfgfile
+    //soundfile, cfgfile
 	pair<char *, char *> parsed = parseArgs(argc, argv);
+
+    char cwd[1024];
+    getcwd(cwd, 1024);
+    if (verbose) cout << "== working directory : " << cwd << endl;
+
+    if (verbose){cout << "== decoding JSON" << endl;}
 	Json::Value root = loadJsonCfg(parsed.second);
 
 	//TODO parse file here
 
 
 	//set the cwd so that loading for the cfg file works
-	if (verbose) cout << "changing directory to config dir" <<endl;
+	if (verbose) cout << "== changing directory to config dir" <<endl;
 	chdir(configDirectory.c_str());
-	char cwd[1024];
 	getcwd(cwd, 1024);
-	if (verbose) cout << "working directory : " << cwd << endl;
+	if (verbose) cout << "== working directory : " << cwd << endl;
+
+
+    if(verbose) cout << "== initializing sdl" << endl;
 
 	//Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );
 	TTF_Init();
 
+    if(verbose) cout << "== initializing window" << endl;
+
 	initWindow(root["config"]);
 
-	//decode components from the JSON
+    if(verbose) cout << "== decoding components from json" << endl;
+
+    //decode components from the JSON
 	vector<EQComponent *> contents = getComponentVectors(
 		root["components"]
 	);
+
 	if(verbose){
 		for (uint i=0; i<contents.size(); i++){
 			cout << endl << contents[i]->repr() <<endl;
@@ -234,8 +258,16 @@ int main (int argc, char *argv []) {
 		cout << endl;
 	}
 
-	//enter mainloop
-	mainloop(root["config"], contents);
+    if(verbose) cout << "== loading song" << endl;
+
+    //make the song
+	Song song = Song(parsed.first);
+
+    //enter mainloop
+	mainloop(
+		root["config"], 
+		&song,
+		contents);
 
 	//Quit SDL
 	SDL_Quit();

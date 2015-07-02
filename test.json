@@ -23,8 +23,8 @@
 			
 			"color" : "FFFFFFAA",
 			"direction" : "North",
-			"barcount" : 12,
-			"barwidth" : 20
+			"barcount" : 30,
+			"barpadding" : 1
 		},
 
 
@@ -90,7 +90,7 @@
 			"localanchor" : "bottom left",
 			"offset": [32,0],
 
-			"font" : "Adec-Title",
+			"font" : "assets/Adec-Title.ttf",
 			"fontsize": 64,
 			"text" : "Sample Text",
 			"color" : "FFFFFFcc"
@@ -103,7 +103,7 @@
 			"localanchor" : "top left",
 			"offset": [32,0],
 
-			"font" : "Adec-Text",
+			"font" : "assets/Adec-Text.ttf",
 			"fontsize": 24,
 			"text" : "this is more example text",
 			"color" : "FFFFFFaa"

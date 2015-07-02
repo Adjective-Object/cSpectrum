@@ -1,12 +1,9 @@
 #include <iostream>
-#include <string>
-#include <stdlib.h>     /* stoul */
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 #include "json/json.h"
 #include "spectrumutil.h"
-#include "anchor.h"
 #include "vcomponents.h"
 
 using namespace std;
@@ -90,7 +87,7 @@ void SimpleBarEq::renderToSurface(
 		SDL_Renderer *renderer, 
 		int timeStepMillis){
 
-	vector<float> *bars = FFT_getBins(this->nBars);
+	vector<double> *bars = FFT_getBins(this->nBars);
 
 	/*
 	for (auto c : *bars)

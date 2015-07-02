@@ -1,9 +1,8 @@
 #include <iostream>
-#include <string>
 #include <cstring>
-#include <stdlib.h>     /* stoul */
 #include "SDL2/SDL.h"
 #include "json/json.h"
+#include "json/value.h"
 #include "anchor.h"
 
 using namespace std;
@@ -45,18 +44,17 @@ pair<float,float> parseFloatPair(Json::Value def) {
 	}
 
 	//typesafety is 4 nerdz;
-	char *s = const_cast<char *>(def.asString().c_str());
-	char *spaceindex = const_cast<char *>(strchr(s, ' '));
+	string definition = def.asString();
+	std::size_t spaceindex = definition.find(" ");
 
-	if (spaceindex == NULL){
+	if (spaceindex == string::npos){
 		cerr << "anchor pair has no space\n";
 		cerr << def;
 		exit(1);
 	}
 
-	*(spaceindex) = '\0';
-	string second = string(s);
-	string first = string(spaceindex+1);
+	string second = definition.substr(0, spaceindex);
+	string first  = definition.substr(spaceindex+1);
 
 	initializeTermMapping();
 	return make_pair<float,float>(

@@ -1,47 +1,40 @@
 #include <cstdio>
 #include "song.h"
 #include <stdlib.h>
+#include <vector>
+#include <stdio.h>
+#include <math.h>
 using namespace std;
 
-static int const SPECTRUM_PLAYERBUFFCOMMAND = 100;
+
 
 // Date constructor
-Player::Player(char *filename) {
-	//will fail on non-null terminated strings
-	char *command = (char *)malloc(sizeof(char) * SPECTRUM_PLAYERBUFFCOMMAND);
-	snprintf(
-		command, 
-		SPECTRUM_PLAYERBUFFCOMMAND, 
-		"ffmpeg -i %s -f s16le -acodec pcm_s16le -ar 44100 -ac 2 -");
-	//where does stderr even go?
-	stream = popen(command, "r");
-
-	framedata = (int *)malloc(sizeof(int) * SPECTRUM_FRAME_SIZE);
+SongReader::SongReader(char *path) {
+	// intialize counter variables
 	_currentframe = 0;
-
 	_totalframes = 0; //TODO calculate song size
+
+    buffer = (double *) malloc(sizeof(double) * SPECTRUM_BUFFSIZE);
 }
 
-//opens the ffmpeg subprocess
-void Player::next_frame() {
-
+SongReader::~SongReader(){
+	free(buffer);
 }
 
+void SongReader::next_frame() {
+	// fill the song data buffer with fake data
+	double trace = 0;
+	for(uint i = 0; i < SPECTRUM_BUFFSIZE; i++) {
+		trace = trace / 2 + fabs((double) rand() / RAND_MAX / 60);
+		buffer[i] = trace;
+	}
+}
+	
 
 
 
-MetaDater::MetaDater(char *filename) {
-	char *command = (char *)malloc(sizeof(char) * SPECTRUM_PLAYERBUFFCOMMAND);
-	snprintf(
-		command, 
-		SPECTRUM_PLAYERBUFFCOMMAND, 
-		"ffprobe %s");
-	//where does stderr go?
-	FILE *stream = popen(command, "r");
 
-	char s[100];
-	string ref = "Input #0, ";
-	int found = 0;
+MetaData::MetaData(char *path) {
 
 }
 

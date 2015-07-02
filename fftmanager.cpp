@@ -4,14 +4,14 @@
 
 using namespace std;
 
-static vector<float> rootbin;
-static map<int, vector<float>> cachedbins = map<int, vector<float>>();
+static vector<double> rootbin;
+static map<int, vector<double>> cachedbins = map<int, vector<double>>();
 
 //TODO implement this
-vector<float> compressBars(vector<float> *bins, int nBars){
-    vector<float> newvector = vector<float>(nBars);
+vector<double> compressBars(vector<double> *bins, int nBars){
+    vector<double> newvector = vector<double>(nBars);
     
-    float step = 1.0f / nBars, sum;
+    double step = 1.0 / nBars, sum;
     int rootStop = 0;
 
     for (int i=0; i<nBars; i++){
@@ -20,16 +20,16 @@ vector<float> compressBars(vector<float> *bins, int nBars){
         for (int x=rootStop; x<stop; x++) {
             sum = sum + (*bins)[x];
         }
-        newvector[i] = sum / (float)(stop - rootStop);
+        newvector[i] = sum / (double)(stop - rootStop);
         rootStop = stop;
 
     }
     return newvector;
 }
 
-//TODO optimize this so the float vectors are on heap
+//TODO optimize this so the double vectors are on heap
 //so we can get a faster initialization
-void FFT_setFrameBin(vector<float> fftbin){
+void FFT_setFrameBin(vector<double> fftbin){
     rootbin = fftbin;
     cachedbins.clear();
     cachedbins[fftbin.size()] = fftbin;
@@ -37,7 +37,7 @@ void FFT_setFrameBin(vector<float> fftbin){
 
 //returns a new equivalent vector with n bins.
 //also caches that bin compression for subsequent calls on the same frame step
-vector<float> *FFT_getBins(int nbars){
+vector<double> *FFT_getBins(int nbars){
     try {
         return &cachedbins.at(nbars);
     } catch(const out_of_range& oor){

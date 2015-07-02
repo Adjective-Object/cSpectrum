@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <vector>
 
-void FFT_setFrameBin(std::vector<float> vectors);
-std::vector<float> *FFT_getBins(int nbars);
+void FFT_setFrameBin(std::vector<double> vectors);
+std::vector<double> *FFT_getBins(int nbars);
 
 #endif
