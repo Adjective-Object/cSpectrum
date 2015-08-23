@@ -11,12 +11,12 @@ static map<int, vector<double>> cachedbins = map<int, vector<double>>();
 vector<double> compressBars(vector<double> *bins, int nBars){
     vector<double> newvector = vector<double>(nBars);
     
-    double step = 1.0 / nBars, sum;
+    double step = 1.0 / nBars;
     int rootStop = 0;
 
     for (int i=0; i<nBars; i++){
         int stop = (step*(i+1)) * bins->size();
-        sum = 0;
+        double sum = 0;
         for (int x=rootStop; x<stop; x++) {
             sum = sum + (*bins)[x];
         }

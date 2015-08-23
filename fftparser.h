@@ -6,18 +6,20 @@
 
 #include <fftw3.h>
 #include <vector>
+#include <stdint.h>
 
 class FFTParser {
 
+	double *in_temp_buffer;
 	double *fftw_out_buffer;
 	fftw_plan plan;
 
 public:
 	
-	FFTParser(double *instream);
+	FFTParser(uint8_t *instream);
 	~FFTParser();
 
-	double *in;
+	uint8_t *in;
 
 	void doAnalysis(std::vector<double> & vector_out);
 };

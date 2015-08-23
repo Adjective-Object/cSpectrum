@@ -6,7 +6,14 @@
 #include <cstdio>
 #include <sys/unistd.h>
 #include <vector>
+#include <queue>
 
+#include <SDL2/SDL_mutex.h>
+
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+}
 
 static int const SPECTRUM_PLAYERBUFFCOMMAND = 100;
 static int const SPECTRUM_BUFFSIZE = 1024;
@@ -30,7 +37,7 @@ class MetaData{
 
 public:
 
-    MetaData(char *filename);
+    MetaData(AVFormatContext *ctx);
     ~MetaData();
 
     //song metadata
@@ -52,15 +59,32 @@ class SongReader{
 
     int _currentframe;
     int _totalframes;
+    AVPacket *_current_packet;
+
+    AVCodec *_input_codec;
+    AVCodecContext *_codec_context;
+    AVFormatContext *_format_context;
+    std::queue<AVPacket*> _pkt_queue;
+    int _tracking_stream;
+
+    void parse_all_frames();
+
+    uint8_t *buffer_head,
+            *buffer_tail,
+            *buffer_data_head,
+            *buffer_data_tail;
+
+    size_t buffer_maxsize;
 
 public:
-    
-    double *buffer;
 
-    SongReader(char *path);
+    uint8_t *output_buffer;
+
+    SongReader(AVFormatContext *formatContext);
     ~SongReader();
 
-    void next_frame(); //steps to the next frame
+    void next_frame(); //gets the next frame
+    void start_reading();
 
     int current_frame()  {return _currentframe;}
     int total_frames()   {return _totalframes;}
@@ -71,11 +95,8 @@ class Song{
 public:
     SongReader *reader;
     MetaData *metadata;
-
-    Song(char *filename) {
-       metadata = new MetaData(filename);
-       reader = new SongReader(filename);
-    }
+    Song(char *filename);
+    ~Song();
 };
 
 #endif

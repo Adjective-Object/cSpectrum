@@ -9,11 +9,12 @@
 #include "fftparser.h"
 #include "parsejson.h"
 #include "song.h"
-#include "unistd.h"
 
 #include <fstream>
-#include <string>
 
+extern "C" {
+#include <libavformat/avformat.h>
+}
 
 using namespace std;
 
@@ -121,6 +122,13 @@ void makeFakeBuffer(vector<double> *fftbuffer) {
 	}
 }
 
+void pushToBuffer(vector<double> & fftbuffer, uint8_t *raw) {
+	for (int i=0; i<SPECTRUM_BUFFSIZE; i++) {
+        fftbuffer[i] = *raw / 255.0;
+		raw++;
+	}
+}
+
 void mainloop(Json::Value config, Song *song, vector<EQComponent *> components) {
 
 	SDL_Color bkgfill = decodeColor(config["bkgfill"].asString());
@@ -136,7 +144,7 @@ void mainloop(Json::Value config, Song *song, vector<EQComponent *> components) 
 	gettimeofday(&lastframe, NULL);
 	long int dtime = 1000000/60;
 
-	FFTParser * parser = new FFTParser(song->reader->buffer);
+	FFTParser * parser = new FFTParser(song->reader->output_buffer);
 
 	SDL_Event e;
 	bool quit = false;
@@ -150,9 +158,17 @@ void mainloop(Json::Value config, Song *song, vector<EQComponent *> components) 
 
 		// advance buffer and get fft data
 		song->reader->next_frame();
+		//pushToBuffer(fftbuffer, song->reader->output_buffer);
 		//makeFakeBuffer(&fftbuffer);
 		parser->doAnalysis(fftbuffer);
 
+        int sum = 0;
+        for (int i=0; i<SPECTRUM_BUFFSIZE; i++) {
+            sum += song->reader->output_buffer[i];
+        }
+
+        cout << "AVG VALUE IN BUFFER: "
+        << (float)(sum) / SPECTRUM_BUFFSIZE << endl;
 
 		SDL_SetRenderDrawColor(
 			Spectrum_renderer,
@@ -224,25 +240,28 @@ int main (int argc, char *argv []) {
     if (verbose){cout << "== decoding JSON" << endl;}
 	Json::Value root = loadJsonCfg(parsed.second);
 
-	//TODO parse file here
-
-
-	//set the cwd so that loading for the cfg file works
+	//set the cwd to the directory of the config file
 	if (verbose) cout << "== changing directory to config dir" <<endl;
 	chdir(configDirectory.c_str());
 	getcwd(cwd, 1024);
 	if (verbose) cout << "== working directory : " << cwd << endl;
 
 
-    if(verbose) cout << "== initializing sdl" << endl;
+    if(verbose) cout << "== initializing ffmpeg" << endl;
+    av_register_all();
 
-	//Start SDL
+    if(verbose) cout << "== initializing sdl" << endl;
+    //Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );
 	TTF_Init();
 
-    if(verbose) cout << "== initializing window" << endl;
+    if(verbose) cout << "== initializing Song" << endl;
 
-	initWindow(root["config"]);
+	//make the song
+	Song song = Song(parsed.first);
+
+    if(verbose) cout << "== initializing window" << endl;
+    initWindow(root["config"]);
 
     if(verbose) cout << "== decoding components from json" << endl;
 
@@ -259,9 +278,6 @@ int main (int argc, char *argv []) {
 	}
 
     if(verbose) cout << "== loading song" << endl;
-
-    //make the song
-	Song song = Song(parsed.first);
 
     //enter mainloop
 	mainloop(

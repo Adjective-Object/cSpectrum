@@ -28,4 +28,6 @@ typedef struct EQProps{
 	int barcount;
 } EQProps;
 
+void backtrace();
+
 #endif

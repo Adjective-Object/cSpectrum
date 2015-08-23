@@ -12,12 +12,11 @@ using namespace std;
 //TODO easing
 LinearEq::LinearEq(
 	Anchor anchorPt, Direction direction, int numBars, 
-	bool reversed) {
-
-	this->reversed = reversed;
-	this->anchor 	= anchorPt;
-	this->direction = direction;
-	this->nBars 	= numBars;
+	bool reversed)
+		: reversed(reversed),
+		  anchor(anchorPt),
+		  direction(direction),
+		  nBars(numBars) {
 
 	if (direction == North || direction == South) {
 		this->eqheight 	= anchorPt.height;
@@ -34,13 +33,10 @@ LinearEq::LinearEq(
 
 SimpleBarEq::SimpleBarEq(
 		Anchor anchor, Direction direction, int numBars, bool reversed,
-			SDL_Color barColor, int barwidth)
-	: LinearEq(anchor, direction, numBars, reversed) {
-	
-	//set internals
-	this->color = barColor;
-	this->barwidth = barwidth;
-
+		SDL_Color barColor, int barwidth)
+			: LinearEq(anchor, direction, numBars, reversed),
+			  color(barColor),
+			  barwidth(barwidth) {
 
 	//cache values for optimization
 	this->offset = Anchor_GetOffset(&anchor);
@@ -144,15 +140,13 @@ void SimpleBarEq::renderToSurface(
 // Text Components
 
 TextComponent::TextComponent(
-	Anchor a, string txt,TTF_Font *dfont, SDL_Color c){
-
-	this->text = txt;
-	this->font = dfont;
-	this->color = c;
+	Anchor a, string txt, TTF_Font *dfont, SDL_Color c)
+		: text(txt),
+          font(dfont),
+		  color(c),
+		  anchor(a){
 
 	TTF_SizeText(dfont, txt.c_str(), &(a.width), &(a.height));
-
-	this->anchor = a;
 
 	pair<int, int> offset = Anchor_GetOffset(&a);
 	this->drawrect = SDL_Rect {
@@ -161,7 +155,6 @@ TextComponent::TextComponent(
 		.w = a.width,
 		.h = a.height
 	};
-
 
 	SDL_Surface *s = TTF_RenderText_Blended(
 						dfont, txt.c_str(),
@@ -205,7 +198,6 @@ BackgroundImage::BackgroundImage(string imgpath){
 	//load,scale, and optimize
 	SDL_Surface *loadedSurface;
 	SDL_Surface *scaledSurface;
-	float loadedRatio;
 
 	if (verbose)
 		cout << "initializing background image "<< imgpath << endl;
