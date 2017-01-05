@@ -1,1 +1,6 @@
 *.o
+cSpectrum
+CMakeFiles
+Makefile
+*.cmake
+
